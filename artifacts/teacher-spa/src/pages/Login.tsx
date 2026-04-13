@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Lock, User, BookOpen, Eye, EyeOff } from "lucide-react";
-import { hasCredentials, verifyPin, setAuthenticated, saveCredentials, getUsername } from "@/lib/auth";
+import { Lock, User, BookOpen, Eye, EyeOff, Shield } from "lucide-react";
+import { hasCredentials, verifyPin, setAuthenticated, saveCredentials, getUsername, setSessionPin } from "@/lib/auth";
 
 interface LoginProps {
   onLogin: () => void;
@@ -43,7 +43,9 @@ export default function Login({ onLogin }: LoginProps) {
           return;
         }
         saveCredentials(username.trim(), pin);
-        setAuthenticated();
+        // Salva il PIN in memoria per la crittografia AES dei dati
+        setSessionPin(pin);
+        setAuthenticated(pin);
         onLogin();
       } else {
         if (!verifyPin(pin)) {
@@ -51,7 +53,9 @@ export default function Login({ onLogin }: LoginProps) {
           setLoading(false);
           return;
         }
-        setAuthenticated();
+        // Salva il PIN in memoria per la crittografia AES dei dati
+        setSessionPin(pin);
+        setAuthenticated(pin);
         onLogin();
       }
     }, 300);
@@ -155,9 +159,13 @@ export default function Login({ onLogin }: LoginProps) {
             </button>
           </form>
 
-          <p className="text-center text-xs text-emerald-400/40 mt-6">
-            I dati sono salvati localmente sul tuo dispositivo
-          </p>
+          {/* Security badge */}
+          <div className="mt-5 flex items-center gap-2 justify-center">
+            <Shield className="w-3 h-3 text-emerald-400/40" />
+            <p className="text-center text-xs text-emerald-400/40">
+              PIN hashato SHA-256 · Dati cifrati AES-256
+            </p>
+          </div>
         </div>
       </div>
     </div>
