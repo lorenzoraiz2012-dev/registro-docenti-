@@ -25,3 +25,20 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+
+## Artifacts
+
+### Registro Docente (`artifacts/teacher-spa`)
+
+- **Type**: React + Vite SPA
+- **Preview path**: `/`
+- **Description**: Professional SPA for teachers with glassmorphism emerald design
+- **Sections**: Home (calendar), Lezioni, Riunioni, Udienze, Annotazioni Studenti, Note Rapide
+- **Auth**: Username + PIN (hashed, stored in localStorage)
+- **Persistence**: localStorage (Firebase Firestore config stub in `src/lib/firebase.ts`)
+- **Styling**: Glassmorphism extreme, emerald color palette, Tailwind CSS
+
+### API Server (`artifacts/api-server`)
+
+- Express 5 REST API
+- Preview path: `/api`

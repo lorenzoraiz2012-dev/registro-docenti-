@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Registro Docente"
+version = "1.0.0"
+id = "artifacts/teacher-spa"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19931
+
+[services.development]
+run = "pnpm --filter @workspace/teacher-spa run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/teacher-spa", "run", "build" ]
+publicDir = "artifacts/teacher-spa/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19931"
+BASE_PATH = "/"
