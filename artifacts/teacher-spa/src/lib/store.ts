@@ -246,6 +246,11 @@ export function isPast(dateStr: string): boolean {
 export function useAppData() {
   const [data, setDataState] = useState<AppData>(() => loadData());
 
+  // Chiamato dopo il login per ricaricare con il PIN ora in memoria
+  const reloadData = useCallback(() => {
+    setDataState(loadData());
+  }, []);
+
   const updateData = useCallback((updater: (prev: AppData) => AppData) => {
     setDataState(prev => {
       const next = updater(prev);
@@ -254,7 +259,7 @@ export function useAppData() {
     });
   }, []);
 
-  return { data, updateData };
+  return { data, updateData, reloadData };
 }
 
 export function formatDate(dateStr: string): string {
