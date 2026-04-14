@@ -26,7 +26,31 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
 
-## Artifacts
+## Artifacts — Registro Docente (teacher-spa)
+
+Italian-language SPA for teachers. Glassmorphism Emerald style.
+
+### Features
+- **Auth**: SHA-256 PIN hashing, AES-256 field encryption, session PIN in memory only
+- **Sections**: Home/Calendar, Lezioni, Riunioni, Udienze, Studenti, Note Rapide, Classi Condivise
+- **Sidebar**: collapsible push-content (w-64 expanded / w-14 icon-only); mobile hamburger overlay
+- **Framer Motion**: page transitions (fade+slide), calendar popup scale-up animation, calendar view fade
+- **Calendar views**: Giorno, Settimana, Mese (default), Anno — with animated transitions
+- **Event popup**: click any event pill → modal with full details + delete button
+- **Classi Condivise**: create a shared class → auto-generated 6-char alphanumeric code; join by code; events: Verifiche (red), Gite (gold), Progetti (orange)
+- **Firebase stub**: `src/lib/firebase.ts` ready for credentials
+
+### Key files
+- `artifacts/teacher-spa/src/App.tsx` — routing, sidebar, Framer Motion transitions
+- `artifacts/teacher-spa/src/lib/auth.ts` — SHA-256 PIN auth, session management
+- `artifacts/teacher-spa/src/lib/crypto.ts` — AES-256 encrypt/decrypt utilities
+- `artifacts/teacher-spa/src/lib/store.ts` — encrypted personal data store
+- `artifacts/teacher-spa/src/lib/sharedStore.ts` — shared class store (unencrypted, by code)
+- `artifacts/teacher-spa/src/pages/Home.tsx` — 4-view calendar + stats + popup
+- `artifacts/teacher-spa/src/components/EventPopup.tsx` — animated event detail popup
+- `artifacts/teacher-spa/src/pages/SharedClasses.tsx` — shared class management
+
+## Other Artifacts
 
 ### Registro Docente (`artifacts/teacher-spa`)
 
