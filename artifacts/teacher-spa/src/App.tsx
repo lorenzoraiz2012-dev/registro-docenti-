@@ -52,23 +52,28 @@ export default function App() {
 
   const { data, updateData } = useAppData();
 
-  useEffect(() => { window.location.hash = section; }, [section]);
+  // ── Tutti gli hook PRIMA di qualsiasi return condizionale ──
+  useEffect(() => {
+    if (authed) window.location.hash = section;
+  }, [authed, section]);
+
   useEffect(() => {
     const onHashChange = () => setSection(getHashSection());
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
 
-  if (!authed) return <Login onLogin={() => setAuthed(true)} />;
-
-  function handleLogout() { logout(); setAuthed(false); }
-  function navigate(s: Section) { setSection(s); setMobileOpen(false); }
-
   const handleDelete = useCallback((kind: string, id: string) => {
     if (kind === "lesson")  updateData(prev => ({ ...prev, lessons:  prev.lessons.filter(x => x.id !== id) }));
     if (kind === "meeting") updateData(prev => ({ ...prev, meetings: prev.meetings.filter(x => x.id !== id) }));
     if (kind === "hearing") updateData(prev => ({ ...prev, hearings: prev.hearings.filter(x => x.id !== id) }));
   }, [updateData]);
+
+  // ── Return condizionale DOPO tutti gli hook ──
+  if (!authed) return <Login onLogin={() => setAuthed(true)} />;
+
+  function handleLogout() { logout(); setAuthed(false); }
+  function navigate(s: Section) { setSection(s); setMobileOpen(false); }
 
   const currentLabel = NAV_ITEMS.find(n => n.id === section)?.label ?? "Home";
 
