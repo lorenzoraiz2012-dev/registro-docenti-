@@ -1,7 +1,8 @@
 import { useState, useCallback } from "react";
 import { encryptField, decryptField } from "@/lib/crypto";
 import { getSessionPin } from "@/lib/auth";
-
+import { db } from './firebase'; 
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 export type EventType = "lesson" | "meeting" | "hearing";
 
 export interface Lesson {
@@ -193,28 +194,30 @@ function decryptData(data: AppData, pin: string): AppData {
 // Load / Save
 // ──────────────────────────────────────────────
 
-export function loadData(): AppData {
+export async function loadData(): Promise<AppData> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_DATA;
-    const parsed = JSON.parse(raw) as AppData;
-    const pin = getSessionPin();
-    if (pin) {
-      return decryptData({ ...DEFAULT_DATA, ...parsed }, pin);
+    // Cerchiamo i dati nel database Firebase
+    const userDoc = doc(db, "settings", "global_data"); 
+    const snap = await getDoc(userDoc);
+
+    if (snap.exists()) {
+      return snap.data() as AppData;
     }
-    return { ...DEFAULT_DATA, ...parsed };
-  } catch {
+    return DEFAULT_DATA;
+  } catch (e) {
+    console.error("Errore nel caricamento da Firebase:", e);
     return DEFAULT_DATA;
   }
 }
 
-export function saveData(data: AppData): void {
+export async function saveData(data: AppData) {
   try {
-    const pin = getSessionPin();
-    const toStore = pin ? encryptData(data, pin) : data;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
-  } catch {
-    console.error("Failed to save data");
+    // Salviamo i dati su Firebase invece che nel browser
+    const userDoc = doc(db, "settings", "global_data");
+    await setDoc(userDoc, data);
+    console.log("Dati salvati correttamente su Firebase!");
+  } catch (e) {
+    console.error("Errore nel salvataggio su Firebase:", e);
   }
 }
 
