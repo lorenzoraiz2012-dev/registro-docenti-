@@ -11,26 +11,25 @@
 // NOTA: Questi valori sono pubblici ma il progetto è protetto
 // dalle Firebase Security Rules configurate nella console.
 // ============================================================
-
-/*
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore"; // Importante per il database
+import { getAuth } from "firebase/auth";           // Importante per il login
 
 const firebaseConfig = {
-  apiKey: "LA_TUA_API_KEY",
-  authDomain: "IL_TUO_PROGETTO.firebaseapp.com",
-  projectId: "IL_TUO_PROJECT_ID",
-  storageBucket: "IL_TUO_PROGETTO.appspot.com",
-  messagingSenderId: "IL_TUO_SENDER_ID",
-  appId: "IL_TUO_APP_ID",
-  measurementId: "IL_TUO_MEASUREMENT_ID" // opzionale
+  apiKey: "AIzaSyCsrq0NKZCWq6p7AROuG-q0trdQhw5INdE",
+  authDomain: "registro-docente-e34da.firebaseapp.com",
+  projectId: "registro-docente-e34da",
+  storageBucket: "registro-docente-e34da.firebasestorage.app",
+  messagingSenderId: "501048364718",
+  appId: "1:501048364718:web:f584e3528d610b29dc273f"
 };
 
+// Inizializza Firebase una sola volta
 const app = initializeApp(firebaseConfig);
+
+// Esporta i servizi per usarli nelle altre parti dell'app
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-
 // ============================================================
 // FIRESTORE COLLECTIONS da usare nell'app:
 //
@@ -40,7 +39,7 @@ export const auth = getAuth(app);
 // - "classes"   → Collezione classi con sottocollezione studenti
 // - "quickNotes"→ Document "notes" con campo "text"
 // ============================================================
-*/
+
 
 // Placeholder: rimuovere questo commento dopo aver configurato Firebase
 export {};
