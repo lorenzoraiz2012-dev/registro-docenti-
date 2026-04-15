@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, Archive, MessageSquare, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Trash2, MessageSquare } from "lucide-react";
 import { AppData, Hearing, generateId, formatDate, isPast } from "@/lib/store";
 
 interface HearingsProps {
@@ -9,7 +9,6 @@ interface HearingsProps {
 
 export default function Hearings({ data, updateData }: HearingsProps) {
   const [showForm, setShowForm] = useState(false);
-  const [showArchive, setShowArchive] = useState(false);
   const [form, setForm] = useState({ date: "", time: "", parent: "", student: "", notes: "" });
   const [error, setError] = useState("");
 
@@ -35,12 +34,12 @@ export default function Hearings({ data, updateData }: HearingsProps) {
     updateData(prev => ({ ...prev, hearings: prev.hearings.filter(h => h.id !== id) }));
   }
 
-  const sorted = [...data.hearings].sort((a, b) => {
-    if (a.date !== b.date) return b.date.localeCompare(a.date);
-    return (b.time || "").localeCompare(a.time || "");
-  });
-  const active = sorted.filter(h => !isPast(h.date));
-  const archive = sorted.filter(h => isPast(h.date));
+  const active = [...data.hearings]
+    .filter(h => !isPast(h.date))
+    .sort((a, b) => {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return (a.time || "").localeCompare(b.time || "");
+    });
 
   return (
     <div className="space-y-6">
@@ -124,22 +123,6 @@ export default function Hearings({ data, updateData }: HearingsProps) {
         {active.map(h => <HearingCard key={h.id} hearing={h} onDelete={handleDelete} />)}
       </div>
 
-      {archive.length > 0 && (
-        <div>
-          <button onClick={() => setShowArchive(!showArchive)}
-            data-testid="button-toggle-archive-hearings"
-            className="flex items-center gap-2 text-sm text-emerald-300/60 hover:text-emerald-300 transition-colors mb-3">
-            <Archive className="w-4 h-4" />
-            Archivio ({archive.length})
-            {showArchive ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-          {showArchive && (
-            <div className="space-y-2">
-              {archive.map(h => <HearingCard key={h.id} hearing={h} onDelete={handleDelete} archived />)}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

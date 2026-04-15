@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, Copy, Check, Trash2, GraduationCap, AlertTriangle,
-  BookOpen, MapPin, Clipboard, ChevronLeft, ChevronRight, X, Calendar
+  BookOpen, MapPin, Clipboard, ChevronLeft, ChevronRight, X, Calendar, Clock, SortAsc
 } from "lucide-react";
 import { useSharedData, SharedClass, SharedEvent } from "@/lib/sharedStore";
 import { formatDate } from "@/lib/store";
@@ -80,6 +80,78 @@ function EventPopup({ event, onClose, onDelete }: {
 }
 
 // ─────────────────────────────────────────────
+// Popup overflow giorno classi condivise
+// ─────────────────────────────────────────────
+type SortMode = "time" | "inserted";
+
+function SharedDayOverflowPopup({ dateStr, evs, onClose, onEventClick }: {
+  dateStr: string;
+  evs: SharedEvent[];
+  onClose: () => void;
+  onEventClick: (ev: SharedEvent) => void;
+}) {
+  const [sort, setSort] = useState<SortMode>("time");
+
+  const sorted = [...evs].sort((a, b) => {
+    if (sort === "time") return a.date.localeCompare(b.date);
+    return (a.createdAt || "").localeCompare(b.createdAt || "");
+  });
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.88, y: 12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.88, y: 12 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          className="glass-strong rounded-2xl p-5 w-full max-w-sm border border-emerald-400/20"
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-xs font-semibold text-emerald-300/50 uppercase tracking-wider">Tutti gli impegni</p>
+              <p className="text-sm font-bold text-white mt-0.5">{formatDate(dateStr)}</p>
+            </div>
+            <button onClick={onClose} className="text-white/30 hover:text-white transition-colors p-1">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-1 glass rounded-xl p-1 mb-4">
+            <button onClick={() => setSort("time")}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${sort === "time" ? "bg-emerald-500/30 text-emerald-300" : "text-white/40 hover:text-white/70"}`}>
+              <Clock className="w-3 h-3" /> Data
+            </button>
+            <button onClick={() => setSort("inserted")}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${sort === "inserted" ? "bg-emerald-500/30 text-emerald-300" : "text-white/40 hover:text-white/70"}`}>
+              <SortAsc className="w-3 h-3" /> Inserimento
+            </button>
+          </div>
+
+          <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+            {sorted.map((ev, i) => {
+              const s = getKindStyle(ev.type);
+              return (
+                <button key={i} onClick={() => { onClose(); onEventClick(ev); }}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl glass-card text-left hover:border-emerald-400/20 transition-all">
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${s.pill} flex-shrink-0`}>{s.label}</span>
+                  <p className="text-sm text-white/80 truncate flex-1">{ev.title}</p>
+                </button>
+              );
+            })}
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+// ─────────────────────────────────────────────
 // Calendario per singola classe
 // ─────────────────────────────────────────────
 function ClassCalendar({ events, onDeleteEvent }: {
@@ -90,6 +162,7 @@ function ClassCalendar({ events, onDeleteEvent }: {
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [popup, setPopup] = useState<SharedEvent | null>(null);
+  const [dayOverflow, setDayOverflow] = useState<{ dateStr: string; evs: SharedEvent[] } | null>(null);
 
   function getEventsForDay(dateStr: string) {
     return events.filter(e => e.date === dateStr).sort((a,b) => a.type.localeCompare(b.type));
@@ -182,9 +255,12 @@ function ClassCalendar({ events, onDeleteEvent }: {
                     );
                   })}
                   {dayEvents.length > 2 && (
-                    <div className="event-pill" style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.35)" }}>
-                      +{dayEvents.length - 2}
-                    </div>
+                    <button
+                      onClick={() => setDayOverflow({ dateStr, evs: dayEvents })}
+                      className="event-pill w-full text-left cursor-pointer hover:opacity-80 transition-opacity"
+                      style={{ background: "rgba(16,185,129,0.15)", color: "rgba(110,231,183,0.8)" }}>
+                      +{dayEvents.length - 2} altri
+                    </button>
                   )}
                 </div>
               </div>

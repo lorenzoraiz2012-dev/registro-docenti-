@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, Archive, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Trash2, BookOpen } from "lucide-react";
 import { AppData, Lesson, generateId, formatDate, isPast } from "@/lib/store";
 
 interface LessonsProps {
@@ -9,7 +9,6 @@ interface LessonsProps {
 
 export default function Lessons({ data, updateData }: LessonsProps) {
   const [showForm, setShowForm] = useState(false);
-  const [showArchive, setShowArchive] = useState(false);
   const [form, setForm] = useState({
     date: "", time: "", subject: "", class: "", topic: "", notes: ""
   });
@@ -37,12 +36,12 @@ export default function Lessons({ data, updateData }: LessonsProps) {
     updateData(prev => ({ ...prev, lessons: prev.lessons.filter(l => l.id !== id) }));
   }
 
-  const sorted = [...data.lessons].sort((a, b) => {
-    if (a.date !== b.date) return b.date.localeCompare(a.date);
-    return (b.time || "").localeCompare(a.time || "");
-  });
-  const active = sorted.filter(l => !isPast(l.date));
-  const archive = sorted.filter(l => isPast(l.date));
+  const active = [...data.lessons]
+    .filter(l => !isPast(l.date))
+    .sort((a, b) => {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return (a.time || "").localeCompare(b.time || "");
+    });
 
   return (
     <div className="space-y-6">
@@ -126,7 +125,7 @@ export default function Lessons({ data, updateData }: LessonsProps) {
       )}
 
       <div className="space-y-3">
-        {active.length === 0 && !showArchive && (
+        {active.length === 0 && (
           <div className="glass-card rounded-2xl p-8 text-center">
             <BookOpen className="w-12 h-12 text-emerald-400/30 mx-auto mb-3" />
             <p className="text-white/40 text-sm">Nessuna lezione pianificata. Aggiungine una!</p>
@@ -136,27 +135,6 @@ export default function Lessons({ data, updateData }: LessonsProps) {
           <LessonCard key={l.id} lesson={l} onDelete={handleDelete} />
         ))}
       </div>
-
-      {archive.length > 0 && (
-        <div>
-          <button
-            onClick={() => setShowArchive(!showArchive)}
-            data-testid="button-toggle-archive-lessons"
-            className="flex items-center gap-2 text-sm text-emerald-300/60 hover:text-emerald-300 transition-colors mb-3"
-          >
-            <Archive className="w-4 h-4" />
-            Archivio ({archive.length})
-            {showArchive ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-          {showArchive && (
-            <div className="space-y-2">
-              {archive.map(l => (
-                <LessonCard key={l.id} lesson={l} onDelete={handleDelete} archived />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

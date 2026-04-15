@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, Archive, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Trash2, Users } from "lucide-react";
 import { AppData, Meeting, generateId, formatDate, isPast, MEETING_TYPES } from "@/lib/store";
 
 interface MeetingsProps {
@@ -9,7 +9,6 @@ interface MeetingsProps {
 
 export default function Meetings({ data, updateData }: MeetingsProps) {
   const [showForm, setShowForm] = useState(false);
-  const [showArchive, setShowArchive] = useState(false);
   const [form, setForm] = useState({ date: "", time: "", type: "", agenda: "", notes: "" });
   const [error, setError] = useState("");
 
@@ -35,12 +34,12 @@ export default function Meetings({ data, updateData }: MeetingsProps) {
     updateData(prev => ({ ...prev, meetings: prev.meetings.filter(m => m.id !== id) }));
   }
 
-  const sorted = [...data.meetings].sort((a, b) => {
-    if (a.date !== b.date) return b.date.localeCompare(a.date);
-    return (b.time || "").localeCompare(a.time || "");
-  });
-  const active = sorted.filter(m => !isPast(m.date));
-  const archive = sorted.filter(m => isPast(m.date));
+  const active = [...data.meetings]
+    .filter(m => !isPast(m.date))
+    .sort((a, b) => {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return (a.time || "").localeCompare(b.time || "");
+    });
 
   return (
     <div className="space-y-6">
@@ -127,22 +126,6 @@ export default function Meetings({ data, updateData }: MeetingsProps) {
         {active.map(m => <MeetingCard key={m.id} meeting={m} onDelete={handleDelete} />)}
       </div>
 
-      {archive.length > 0 && (
-        <div>
-          <button onClick={() => setShowArchive(!showArchive)}
-            data-testid="button-toggle-archive-meetings"
-            className="flex items-center gap-2 text-sm text-emerald-300/60 hover:text-emerald-300 transition-colors mb-3">
-            <Archive className="w-4 h-4" />
-            Archivio ({archive.length})
-            {showArchive ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-          {showArchive && (
-            <div className="space-y-2">
-              {archive.map(m => <MeetingCard key={m.id} meeting={m} onDelete={handleDelete} archived />)}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
