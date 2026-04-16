@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from 'react';
 import { encryptField, decryptField } from "@/lib/crypto";
 import { getSessionPin } from "@/lib/auth";
 import { db } from './firebase'; 
@@ -247,15 +247,28 @@ export function isPast(dateStr: string): boolean {
 }
 
 export function useAppData() {
-  const [data, setDataState] = useState<AppData>(() => loadData());
+  // Inizializziamo lo stato a null o vuoto finché Firebase non risponde
+  const [data, setDataState] = useState<AppData | null>(null);
 
-  // Chiamato dopo il login per ricaricare con il PIN ora in memoria
-  const reloadData = useCallback(() => {
-    setDataState(loadData());
+  // Funzione per caricare i dati (ora asincrona)
+  const reloadData = useCallback(async () => {
+    try {
+      const freshData = await loadData();
+      setDataState(freshData);
+    } catch (error) {
+      console.error("Errore caricamento Firebase:", error);
+    }
   }, []);
+
+  // Avvia il caricamento non appena l'app viene aperta
+  useEffect(() => {
+    reloadData();
+  }, [reloadData]);
 
   const updateData = useCallback((updater: (prev: AppData) => AppData) => {
     setDataState(prev => {
+      // Se i dati non sono ancora pronti, non facciamo nulla
+      if (!prev) return prev; 
       const next = updater(prev);
       saveData(next);
       return next;

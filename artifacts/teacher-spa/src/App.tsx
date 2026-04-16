@@ -51,6 +51,13 @@ export default function App() {
   const [expanded, setExpanded]     = useState(true);
 
   const { data, updateData, reloadData } = useAppData();
+  if (!data) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#1a4731', color: 'white' }}>
+        <h2>Caricamento registro...</h2>
+      </div>
+    );
+  }
 
   // ── Tutti gli hook PRIMA di qualsiasi return condizionale ──
   useEffect(() => {
