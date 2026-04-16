@@ -50,16 +50,33 @@ export default function App() {
   // true = w-64 (icone + etichette), false = w-14 (solo icone)
   const [expanded, setExpanded]     = useState(true);
 
+  // 1. Chiamata al nostro Hook (riga 53 circa)
   const { data, updateData, reloadData } = useAppData();
+
+  // 2. PROTEZIONE: Questo DEVE essere subito dopo la riga sopra.
+  // Non deve esserci nessun'altra riga di codice che usa "data" in mezzo.
   if (!data) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#1a4731', color: 'white' }}>
-        <h2>Caricamento registro...</h2>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh', 
+        background: '#1a4731', // Colore verde del tuo sfondo
+        color: 'white' 
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2>Caricamento Registro...</h2>
+          <p>Sto recuperando i dati da Firebase</p>
+        </div>
       </div>
     );
   }
 
+  // 3. Solo da qui in poi puoi avere il resto del codice
+  // (quello che usa data.lessons, data.settings, ecc...)
   // ── Tutti gli hook PRIMA di qualsiasi return condizionale ──
+  
   useEffect(() => {
     if (authed) window.location.hash = section;
   }, [authed, section]);
