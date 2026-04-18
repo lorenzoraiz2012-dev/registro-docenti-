@@ -45,38 +45,19 @@ const PAGE_VARIANTS = {
 };
 
 export default function App() {
-  const [authed, setAuthed]         = useState(checkAuthed);
-  const [section, setSection]       = useState<Section>(getHashSection);
-  // true = w-64 (icone + etichette), false = w-14 (solo icone)
-  const [expanded, setExpanded]     = useState(true);
+  // --- ZONA HOOK: Tutti i comandi "use" devono stare qui in alto ---
+  const [authed, setAuthed]   = useState(checkAuthed);
+  const [section, setSection] = useState<Section>(getHashSection);
+  const [expanded, setExpanded] = useState(true);
 
-  // 1. Chiamata al nostro Hook (riga 53 circa)
+  // Caricamento dati da Firebase
   const { data, updateData, reloadData } = useAppData();
 
-  // 2. PROTEZIONE: Questo DEVE essere subito dopo la riga sopra.
-  // Non deve esserci nessun'altra riga di codice che usa "data" in mezzo.
-  if (!data) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh', 
-        background: '#1a4731', // Colore verde del tuo sfondo
-        color: 'white' 
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <h2>Caricamento Registro...</h2>
-          <p>Sto recuperando i dati da Firebase</p>
-        </div>
-      </div>
-    );
-  }
-
-  // 3. Solo da qui in poi puoi avere il resto del codice
-  // (quello che usa data.lessons, data.settings, ecc...)
-  // ── Tutti gli hook PRIMA di qualsiasi return condizionale ──
-  
+  // Gestione dell'URL (Spostato qui sopra per non violare le regole di React)
+  useEffect(() => {
+    if (authed) window.location.hash = section;
+  }, [authed, section]);
+ 
   useEffect(() => {
     if (authed) window.location.hash = section;
   }, [authed, section]);
@@ -87,6 +68,30 @@ export default function App() {
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
 
+  // --- ZONA PROTEZIONE: Solo dopo gli Hook possiamo fermare l'app se mancano i dati ---
+  if (!data) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh', 
+        background: '#1a4731', 
+        color: 'white' 
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Caricamento Registro...</h2>
+          <p>Recupero dati da Firebase in corso</p>
+        </div>
+      </div>
+    );
+  }
+
+  // --- ZONA LOGICA: Ora che i dati ci sono, controlliamo il login ---
+  if (!authed) {
+    return <Login onLogin={() => { setAuthed(true); reloadData(); }} />;
+  }  
+ 
   const handleDelete = useCallback((kind: string, id: string) => {
     if (kind === "lesson")  updateData(prev => ({ ...prev, lessons:  prev.lessons.filter(x => x.id !== id) }));
     if (kind === "meeting") updateData(prev => ({ ...prev, meetings: prev.meetings.filter(x => x.id !== id) }));
